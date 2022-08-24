@@ -60,6 +60,3 @@ cv.imwrite('noite-estrelada-gray.png', night_gray)
 cv.imwrite('noite-estrelada-negative.png', night_negative_img)
 cv.imwrite('noite-estrelada-rgb-merged.png', night_merged_img)
 cv.imwrite('noite-estrelada-hsv.png', night_hsv_img)
-
-
-# %%
