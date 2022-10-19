@@ -1,52 +1,47 @@
-# %% Imports & read image
-from ast import main
-import cv2
-import numpy as np
-import argparse
+#%%
+import sys
+import cv2 as cv
 import matplotlib.pyplot as plt
 
-from gaussian_smoothing import gaussian_blur
-from convolution import convolution
+def main(argv):
+    
+    scale = 1
+    delta = 0
+    ddepth = cv.CV_16S
+    
+    
+    if len(argv) < 1:
+        print ('Not enough parameters')
+        print ('Usage:\nmorph_lines_detection.py < path_to_image >')
+        return -1
 
-# img = cv2.imread("desk.jpg", 1)
-
-def sobel_detection(image, filter, verbose=False):
-    new_image_x = convolution(image, filter, verbose)
-
-    if verbose:
-        plt.imshow(new_image_x, cmap='gray')
-        plt.title("Horizontal Edge")
-        plt.show()
-
-        new_image_y = convolution(image, np.flip(filter.T, axis=0), verbose)
-
-        if verbose:
-            plt.imshow(new_image_y, cmap="gray")
-            plt.title("Vertical Edge")
-            plt.show()
-
-        gradient_magnitude = np.sqrt(
-            np.square(new_image_x) + np.square(new_image_y))
-
-        gradient_magnitude *= 255.0 / gradient_magnitude.max()
-
-        if verbose:
-            plt.imshow(gradient_magnitude, cmap='gray')
-            plt.title("Gradient Magnitude")
-            plt.show()
-
-        return gradient_magnitude
+    # Load the image
+    img = cv.imread(argv[0], 0)
+    # Check if image is loaded fine
+    if img is None:
+        print ('Error opening image: ' + argv[0])
+        return -1
+    
+    # Reduce noise
+    img = cv.GaussianBlur(img, (3, 3), 0)
+    
+    # Sobel Operator
+    grad_x = cv.Sobel(img, ddepth, 1, 0, ksize=3, scale=scale, delta=delta, borderType=cv.BORDER_DEFAULT)
+    grad_y = cv.Sobel(img, ddepth, 0, 1, ksize=3, scale=scale, delta=delta, borderType=cv.BORDER_DEFAULT)
+    
+    abs_grad_x = cv.convertScaleAbs(grad_x)
+    abs_grad_y = cv.convertScaleAbs(grad_y)
+    
+    
+    # Gradient
+    grad = cv.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.2, 0)
 
 
-if __name__ == '__main__':
-    filter = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+    # Show image
+    plt.imshow(grad, cmap='gray')
+    cv.imwrite('Sobel Image.jpg', grad );
+    
+    return 0
 
-    ap = argparse.ArgumentParser()
-    ap.add_argument("-i", "--image", required=True, help="Path to the image")
-    args = vars(ap.parse_args())
-
-    image = cv2.imread(args["image"])
-    image = gaussian_blur(image, 9, verbose=True)
-    sobel_detection(image, filter, verbose=True)
-
-# %%
+if __name__ == "__main__":
+    main(['tennis-player.jpg'])
