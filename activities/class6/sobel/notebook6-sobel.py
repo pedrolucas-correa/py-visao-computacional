@@ -1,5 +1,4 @@
 #%%
-import sys
 import cv2 as cv
 import matplotlib.pyplot as plt
 
@@ -44,4 +43,5 @@ def main(argv):
     return 0
 
 if __name__ == "__main__":
-    main(['tennis-player.jpg'])
+    main(['desk.jpg'])
+# %%
